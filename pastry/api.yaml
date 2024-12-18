@@ -1,0 +1,65 @@
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIAccess
+metadata:
+  name: local-access
+  namespace: default
+spec:
+  apiSelector: {}
+  everyone: true
+
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: API
+metadata:
+  name: local-pastry
+  namespace: default
+spec:
+  openApiSpec:
+    url: https://gist.githubusercontent.com/youkoulayley/63c4ce523778aa2b3a5da41719129146/raw/1b476c40291c65bab54dc1a5c4f7aa2489f52aff/pastry.yaml
+    override:
+      servers:
+        - url: http://pastry.${CLUSTERNAME}.${DOMAINNAME}
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pastry-ingress
+  namespace: default
+  annotations:
+    hub.traefik.io/api: local-pastry@default
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`pastry.${CLUSTERNAME}.${DOMAINNAME}`)
+      kind: Rule
+      services:
+        - name: mock-api-pastry-2-0@microcks
+          kind: TraefikService
+      middlewares:
+        - name: cors-middleware
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: cors-middleware
+  namespace: default
+spec:
+  headers:
+    accessControlAllowOriginList:
+      - "http://portal.docker.localhost"
+    accessControlAllowMethods:
+      - "GET"
+      - "OPTIONS"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+    accessControlAllowHeaders:
+      - "Authorization"
+      - "Content-Type"
+    accessControlAllowCredentials: true
+    accessControlMaxAge: 100
+    addVaryHeader: true

@@ -1,0 +1,67 @@
+appName: microcks
+
+ingresses: false
+
+microcks:
+  grpcEnableTLS: false
+  generateCert: false
+
+  image:
+    registry: quay.io
+    repository: microcks/microcks
+    tag: 1.10.1
+    digest:
+  replicas: 1
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  logLevel: INFO
+
+postman:
+  image:
+    registry: quay.io
+    repository: microcks/microcks-postman-runtime
+    tag: 0.6.0
+    digest:
+  replicas: 1
+  resources:
+    requests:
+      memory: 256Mi
+    limits:
+      memory: 256Mi
+
+keycloak:
+  enabled: false
+  install: false
+
+mongodb:
+  install: true
+  image:
+    registry:
+    repository: library/mongo
+    tag: 4.4.29
+    digest:
+  persistent: true
+  volumeSize: 2Gi
+  username: userM
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+features:
+  async:
+    enabled: false
+
+commonLabels: {}
+
+commonAnnotations: {}
